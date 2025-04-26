@@ -408,21 +408,19 @@ export class LoginComponent {
     if (this.loginForm.invalid) {
       return;
     }
-
-    this.isLoading = true;
-    this.errorMessage = '';
     
+    this.isLoading = true;
     const { email, password } = this.loginForm.value;
     
     this.authService.login(email, password).subscribe({
       next: (response) => {
         this.isLoading = false;
-        // Navigate to home page or dashboard after successful login
-        this.router.navigate(['/']);
+        // Redirect to dashboard after successful login
+        this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
+        this.errorMessage = error.message;
       }
     });
   }

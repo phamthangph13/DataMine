@@ -1,0 +1,35 @@
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">
+      <h2>DataMine</h2>
+    </div>
+    <nav class="menu">
+      <ul>
+        @for (item of menuItems; track item.name) {
+          <li>
+            <a [routerLink]="item.route" routerLinkActive="active">
+              <span class="icon">
+                <i class="material-icons">{{item.icon}}</i>
+              </span>
+              <span class="text">{{item.name}}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="top-bar">
+      <div class="user-info">
+        <span class="user-name">Người dùng</span>
+        <button class="logout-btn" (click)="logout()">Đăng xuất</button>
+      </div>
+    </header>
+    <div class="content-area">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div> 
