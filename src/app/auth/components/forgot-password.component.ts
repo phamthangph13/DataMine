@@ -2,17 +2,22 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule, HttpClientModule],
   template: `
     <div class="auth-form">
       <div class="auth-header">
         <h2>Quên mật khẩu</h2>
         <p>Nhập email của bạn để nhận hướng dẫn đặt lại mật khẩu</p>
       </div>
+      
+      <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+      <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
       
       <form [formGroup]="forgotPasswordForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
@@ -33,9 +38,9 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
         <button 
           type="submit" 
           class="btn-submit"
-          [disabled]="forgotPasswordForm.invalid"
+          [disabled]="forgotPasswordForm.invalid || isLoading"
         >
-          Gửi hướng dẫn
+          {{ isLoading ? 'Đang gửi...' : 'Gửi hướng dẫn' }}
         </button>
       </form>
       
@@ -130,21 +135,59 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
       text-decoration: none;
       font-weight: 500;
     }
+    
+    .alert {
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+    
+    .alert-success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+    
+    .alert-danger {
+      background-color: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
   `
 })
 export class ForgotPasswordComponent {
   forgotPasswordForm: FormGroup;
+  successMessage = '';
+  errorMessage = '';
+  isLoading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
   }
 
   onSubmit() {
-    if (this.forgotPasswordForm.valid) {
-      console.log('Forgot password form submitted', this.forgotPasswordForm.value);
-      // TODO: Implement forgot password logic
+    if (this.forgotPasswordForm.invalid) {
+      return;
     }
+
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+    
+    const { email } = this.forgotPasswordForm.value;
+    
+    this.authService.forgotPassword(email).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.successMessage = response.message || 'Password reset instructions sent to your email.';
+        this.forgotPasswordForm.reset();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Failed to send password reset instructions. Please try again.';
+      }
+    });
   }
 } 

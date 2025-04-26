@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule, HttpClientModule],
   template: `
     <div class="form-container">
       <div class="form-header">
@@ -91,7 +93,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
           </div>
           <div class="error-message" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
             <span *ngIf="registerForm.get('password')?.errors?.['required']">Mật khẩu là bắt buộc</span>
-            <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Mật khẩu phải có ít nhất 6 ký tự</span>
+            <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Mật khẩu phải có ít nhất 8 ký tự</span>
           </div>
         </div>
         
@@ -406,13 +408,20 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 export class RegisterComponent {
   registerForm: FormGroup;
   showPassword = false;
+  errorMessage = '';
+  successMessage = '';
+  isLoading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.registerForm = this.fb.group({
-      fullName: ['', Validators.required],
+      fullName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      agreeTerms: [false, Validators.requiredTrue]
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      agreeTerms: [false, [Validators.requiredTrue]]
     });
   }
 
@@ -421,19 +430,40 @@ export class RegisterComponent {
   }
 
   registerWithGoogle() {
-    console.log('Register with Google clicked');
-    // TODO: Implement Google registration
+    console.log('Register with Google');
+    // Will implement social login later
   }
 
   registerWithFacebook() {
-    console.log('Register with Facebook clicked');
-    // TODO: Implement Facebook registration
+    console.log('Register with Facebook');
+    // Will implement social login later
   }
 
   onSubmit() {
-    if (this.registerForm.valid) {
-      console.log('Register form submitted', this.registerForm.value);
-      // TODO: Implement registration logic
+    if (this.registerForm.invalid) {
+      return;
     }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    
+    const { fullName, email, password } = this.registerForm.value;
+    
+    this.authService.register(fullName, email, password).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.successMessage = response.message || 'Registration successful! Please check your email to verify your account.';
+        this.registerForm.reset();
+        // After successful registration, redirect to login page in 3 seconds
+        setTimeout(() => {
+          this.router.navigate(['/auth/login']);
+        }, 3000);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Registration failed. Please try again.';
+      }
+    });
   }
 } 

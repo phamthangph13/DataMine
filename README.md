@@ -1,59 +1,85 @@
-# DataExplore
+# DataMine
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
+DataMine là một nền tảng khai thác dữ liệu từ nhiều nguồn khác nhau.
 
-## Development server
+## Cấu trúc dự án
 
-To start a local development server, run:
+- `src/` - Frontend Angular
+- `server/` - Backend NodeJS
 
-```bash
-ng serve
+## Yêu cầu hệ thống
+
+- Node.js (v14+)
+- MongoDB
+- Angular CLI
+
+## Cài đặt và chạy ứng dụng
+
+### Cài đặt và chạy Backend
+
+1. Tạo file `.env` trong thư mục `server/` với nội dung:
+
+```
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/datamine
+JWT_SECRET=datamine_secret_key_change_in_production
+JWT_EXPIRE=7d
+
+# Email Configuration
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SENDER_EMAIL=dounecompany@gmail.com
+SENDER_NAME=DataMine
+EMAIL_USERNAME=dounecompany@gmail.com
+EMAIL_PASSWORD=zasa vbpy arko snov
+USE_SSL=true
+BASE_URL=http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+2. Mở terminal và cài đặt dependencies cho backend:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+cd server
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+3. Chạy backend server:
 
-```bash
-ng generate --help
+```
+npm run dev
 ```
 
-## Building
+Backend API sẽ chạy tại: http://localhost:5000
 
-To build the project run:
+### Cài đặt và chạy Frontend
 
-```bash
-ng build
+1. Mở một terminal mới và cài đặt dependencies cho frontend:
+
+```
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+2. Chạy frontend:
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
+```
+npm start
 ```
 
-## Running end-to-end tests
+Frontend sẽ chạy tại: http://localhost:4200
 
-For end-to-end (e2e) testing, run:
+## Tính năng
 
-```bash
-ng e2e
-```
+### Authentication
+- Đăng ký tài khoản với xác minh email
+- Đăng nhập
+- Quên mật khẩu và đặt lại mật khẩu qua email
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## API Endpoints
 
-## Additional Resources
+### Authentication
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `POST /api/auth/register` - Đăng ký người dùng mới
+- `GET /api/auth/verify-email/:token` - Xác minh email người dùng
+- `POST /api/auth/login` - Đăng nhập người dùng
+- `POST /api/auth/forgot-password` - Yêu cầu đặt lại mật khẩu
+- `POST /api/auth/reset-password/:token` - Đặt lại mật khẩu bằng token

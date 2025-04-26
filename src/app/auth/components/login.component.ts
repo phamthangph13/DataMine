@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ReactiveFormsModule, HttpClientModule],
   template: `
     <div class="form-container">
       <div class="form-header">
@@ -373,8 +375,14 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 export class LoginComponent {
   loginForm: FormGroup;
   showPassword = false;
+  errorMessage = '';
+  isLoading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -387,19 +395,35 @@ export class LoginComponent {
   }
 
   loginWithGoogle() {
-    console.log('Login with Google clicked');
-    // TODO: Implement Google login
+    console.log('Login with Google');
+    // Will implement social login later
   }
 
   loginWithFacebook() {
-    console.log('Login with Facebook clicked');
-    // TODO: Implement Facebook login
+    console.log('Login with Facebook');
+    // Will implement social login later
   }
 
   onSubmit() {
-    if (this.loginForm.valid) {
-      console.log('Login form submitted', this.loginForm.value);
-      // TODO: Implement authentication logic
+    if (this.loginForm.invalid) {
+      return;
     }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    const { email, password } = this.loginForm.value;
+    
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        // Navigate to home page or dashboard after successful login
+        this.router.navigate(['/']);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
+      }
+    });
   }
 } 
