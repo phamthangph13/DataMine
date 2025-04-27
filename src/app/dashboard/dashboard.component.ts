@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth/services/auth.service';
@@ -20,10 +20,30 @@ export class DashboardComponent {
     { name: 'Cài đặt', route: '/dashboard/settings', icon: 'settings' }
   ];
 
+  isMobileView = false;
+  isSidebarCollapsed = false;
+  
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    // Initialize mobile view based on screen size
+    this.checkScreenSize();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isMobileView = window.innerWidth <= 768;
+    this.isSidebarCollapsed = this.isMobileView;
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
 
   logout(): void {
     this.authService.logout();
